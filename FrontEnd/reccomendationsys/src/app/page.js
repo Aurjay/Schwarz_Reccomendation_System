@@ -88,7 +88,7 @@ const ProductRecommendation = () => {
     <div className="container">
  <h1>Product Recommendation system using Neural Coloborative Filtering</h1>
       <br />
-      <h2>Based on your product selection the AI system in the backend recommends the product that the user is most likely to buy next.</h2>
+      <h2>Based on past data, the AI system recommends the product that the users are most likely to buy next.</h2>
       <div className="form-container">
         <div className="form-card">
           <label>Select Product 1:</label>

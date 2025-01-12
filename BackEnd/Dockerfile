@@ -1,31 +1,35 @@
-# Use a lightweight Python base image
-FROM python:3.8-slim
+# Use Python 3.9 slim base image for smaller size
+FROM python:3.9-slim
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy only necessary files
+# Copy requirements file first to leverage Docker cache
 COPY requirements.txt .
 
-# Install minimal system dependencies
+# Install system dependencies (if needed, e.g., for numpy or PyTorch)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libatlas-base-dev && \
-    rm -rf /var/lib/apt/lists/*
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install PyTorch from the custom index
+# Install PyTorch CPU version (optimized for production) with compatible NumPy
 RUN pip install --no-cache-dir \
     torch==2.1.1+cpu \
-    --index-url https://download.pytorch.org/whl/cpu
+    --index-url https://download.pytorch.org/whl/cpu \
+    --default-timeout=100
 
-# Install remaining Python dependencies from default PyPI
-RUN pip install --no-cache-dir flask pandas scikit-learn && \
-    pip install --no-cache-dir -r requirements.txt
+# Install the remaining Python packages from requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application files
+# Copy the entire application code into the container
 COPY . .
 
-# Expose the Flask port
-EXPOSE 5001
+# Expose the port that the Flask app runs on
+EXPOSE 8080
 
-# Run the application
+# Set environment variables for production
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+
+# Run the Flask app
 CMD ["python", "app.py"]

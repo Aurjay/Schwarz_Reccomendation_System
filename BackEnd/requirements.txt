@@ -1,4 +1,6 @@
 flask
-torch
 pandas
 scikit-learn
+flask-cors
+joblib
+numpy==1.26.1

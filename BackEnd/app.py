@@ -4,12 +4,13 @@ import joblib
 from torch.utils.data import DataLoader, Dataset
 from Neural_net_model import Neural_Net
 from flask_cors import CORS  # Import CORS
+import os  # Import os for environment variable access
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Enable CORS for all routes
-CORS(app) 
+CORS(app)
 
 # Custom dataset class for inference (user, product_1, product_2)
 class RecommenderDataset(Dataset):
@@ -26,12 +27,12 @@ class RecommenderDataset(Dataset):
 
 # Load encoders and model
 user_encoder = joblib.load('./models/user_encoder.pkl')  
-product_encoder = joblib.load('./models/product_encoder.pkl')  
+product_encoder = joblib.load('./models/product_encoder.pkl')
 
 # Define the model architecture (same as during training)
-n_users = len(user_encoder.classes_)  
-n_products = len(product_encoder.classes_) 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+n_users = len(user_encoder.classes_)
+n_products = len(product_encoder.classes_)
+device = torch.device("cpu")  # Ensure it defaults to CPU (as Cloud Run doesn't support GPU)
 
 model = Neural_Net(
     n_users=n_users, 
@@ -45,7 +46,6 @@ model = Neural_Net(
 # Load the best trained model (ensure the model architecture matches)
 model.load_state_dict(torch.load('./models/best_model.pth', map_location=device))
 model.eval()
-
 
 # Default user ID (can be changed to any fixed user ID)
 DEFAULT_USER_ID = 1
@@ -65,7 +65,7 @@ def make_inference(model, user_id, product_1_id, product_2_id):
 
             # Forward pass to get predictions
             outputs = model(user_ids, product_1_ids, product_2_ids)
-            _, predicted = torch.max(outputs, 1)  
+            _, predicted = torch.max(outputs, 1)
 
             # Decode the product IDs back to product names
             decoded_predictions = product_encoder.inverse_transform(predicted.cpu().numpy())
@@ -103,5 +103,5 @@ def recommend_products():
 
 # Run the Flask app
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5001)
-
+    port = int(os.environ.get('PORT', 8080))  # Get port from environment variable
+    app.run(debug=False, host="0.0.0.0", port=port)  # Disable debug mode in production
