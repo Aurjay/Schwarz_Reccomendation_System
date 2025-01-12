@@ -1,1 +1,5 @@
 Model_Training/e_commerce_data_Cleaned.csv
+ECommerce_consumer behaviour.csv
+BackEnd/__pycache__/
+Model_Training/Neural_Network_based_Recomendation/__pycache__/Neural_net_model.cpython-310.pyc
+BackEnd/deployenv

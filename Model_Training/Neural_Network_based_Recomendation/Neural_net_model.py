@@ -22,7 +22,7 @@ class Neural_Net(nn.Module):
         dropouts: Dropout rates applied after each hidden layer (single int or list).
     """
     def __init__(self, n_users, n_products, n_factors=50, embedding_dropout=0.02,
-                 hidden=10, dropouts=0.2):
+                 hidden=[100, 50], dropouts=[0.3, 0.2]):
         super().__init__()
         hidden = get_list(hidden)
         dropouts = get_list(dropouts)
@@ -32,9 +32,9 @@ class Neural_Net(nn.Module):
             Generator that yields a sequence of hidden layers and their activations/dropouts.
             """
             nonlocal hidden, dropouts
-            assert len(dropouts) <= len(hidden)
-            for n_out, rate in zip_longest(hidden, dropouts):
+            for n_out, rate in zip_longest(hidden, dropouts + [None] * (len(hidden) - len(dropouts))):
                 yield nn.Linear(n_in, n_out)
+                yield nn.BatchNorm1d(n_out)  # Added batch normalization
                 yield nn.ReLU()
                 if rate is not None and rate > 0.:
                     yield nn.Dropout(rate)
@@ -42,52 +42,32 @@ class Neural_Net(nn.Module):
 
         # User and product embeddings
         self.u = nn.Embedding(n_users, n_factors)
-        self.p = nn.Embedding(n_products, n_factors)
+        self.p1 = nn.Embedding(n_products, n_factors)
+        self.p2 = nn.Embedding(n_products, n_factors)
 
-        # Dropout after embeddings
+        # Dropout layer for embedding space
         self.drop = nn.Dropout(embedding_dropout)
+        
+        # Sequential layers for hidden layers
+        self.hidden_layers = nn.Sequential(*list(gen_layers(3 * n_factors)))
+        
+        # Output layer (size of products)
+        self.output = nn.Linear(hidden[-1], n_products)
 
-        # Hidden layers
-        self.hidden = nn.Sequential(*list(gen_layers(n_factors * 3)))  # Updated for two products
-
-        # Output layer: Predict next product (as a multi-class classification task)
-        self.fc = nn.Linear(hidden[-1], n_products)
-
-        # Initialize weights
-        self._init()
-
-    def forward(self, users, product_1, product_2):
+    def forward(self, u, p1, p2):
         """
-        Forward pass through the network.
+        Forward pass to predict the next product for a given user and product pair.
 
         Args:
-            users: Tensor of user indices.
-            product_1: Tensor of first product indices.
-            product_2: Tensor of second product indices.
-
-        Returns:
-            Predicted scores for the next product (multi-class probabilities).
+            u: User indices.
+            p1: First product indices.
+            p2: Second product indices.
         """
-        user_embeds = self.u(users)
-        product_1_embeds = self.p(product_1)
-        product_2_embeds = self.p(product_2)
+        u = self.u(u)
+        p1 = self.p1(p1)
+        p2 = self.p2(p2)
+        x = torch.cat([u, p1, p2], 1)  
+        x = self.drop(x) 
+        x = self.hidden_layers(x)  
+        return self.output(x)  
 
-        combined_embeds = torch.cat([user_embeds, product_1_embeds, product_2_embeds], dim=1)
-        x = self.drop(combined_embeds)
-        x = self.hidden(x)
-        out = self.fc(x)  # Raw scores for each product class
-        return out
-
-    def _init(self):
-        """
-        Initialize weights of the model with Xavier uniform distribution for layers.
-        """
-        def init(m):
-            if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform_(m.weight)
-                m.bias.data.fill_(0.01)
-
-        self.u.weight.data.uniform_(-0.05, 0.05)
-        self.p.weight.data.uniform_(-0.05, 0.05)
-        self.hidden.apply(init)
-        init(self.fc)
