@@ -45,7 +45,3 @@ To train the model:
 
 ### 6.3 Model Hosting (Azure & Google Cloud)
 - The image container is hosted on **Microsoft Azure** and **Google Cloud Platform** using Docker for scalability.
-
-## 7. Conclusion
-
-This project implements a personalized product recommendation system using machine learning models, a Flask backend, and a React frontend.
