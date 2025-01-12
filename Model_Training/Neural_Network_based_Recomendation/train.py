@@ -94,7 +94,6 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(data)):
         correct_predictions = 0
         total_predictions = 0
         predictions = []
-
         with torch.no_grad():
             for user_ids, product_1_ids, product_2_ids, next_product_ids in val_loader:
                 user_ids, product_1_ids, product_2_ids, next_product_ids = user_ids.to(device), product_1_ids.to(device), product_2_ids.to(device), next_product_ids.to(device)
