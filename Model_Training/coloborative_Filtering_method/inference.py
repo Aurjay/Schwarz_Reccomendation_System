@@ -16,7 +16,7 @@ def recommend_products_for_new_user(new_product, top_n=3):
     for product in recommendations:
         print(f"- {product}")
 
-# Example: Recommend products for a new user who ordered 'Apple'
+
 if __name__ == "__main__":
     new_product = "fresh fruits"
     top_n = 3

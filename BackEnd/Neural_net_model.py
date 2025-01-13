@@ -66,8 +66,8 @@ class Neural_Net(nn.Module):
         u = self.u(u)
         p1 = self.p1(p1)
         p2 = self.p2(p2)
-        x = torch.cat([u, p1, p2], 1)  # Concatenate user and product embeddings
-        x = self.drop(x)  # Apply embedding dropout
-        x = self.hidden_layers(x)  # Apply hidden layers
-        return self.output(x)  # Predict next product
+        x = torch.cat([u, p1, p2], 1)  
+        x = self.drop(x)  
+        x = self.hidden_layers(x)  
+        return self.output(x)  
 

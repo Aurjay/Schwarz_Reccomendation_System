@@ -45,9 +45,7 @@ def evaluate_recommendations(test_data, train_co_occurrence, top_n=3):
             
             # Check if any of the recommendations match the ordered product
             for recommendation in recommendations:
-                # Append the actual ordered product to y_true
                 y_true.append(product)
-                # Append the recommended product to y_pred
                 y_pred.append(recommendation)
     
     # Calculate precision, recall, and F1 score

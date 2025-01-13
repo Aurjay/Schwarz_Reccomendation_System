@@ -81,8 +81,8 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(data)):
     ).to(device)
 
     # Define loss and optimizer (L2 regularization with weight decay)
-    criterion = nn.CrossEntropyLoss()  # For multi-class classification
-    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)  # L2 regularization (weight_decay)
+    criterion = nn.CrossEntropyLoss()  
+    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)  
 
     # Learning rate scheduler
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)  

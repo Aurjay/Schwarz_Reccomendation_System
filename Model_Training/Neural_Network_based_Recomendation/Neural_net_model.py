@@ -34,7 +34,7 @@ class Neural_Net(nn.Module):
             nonlocal hidden, dropouts
             for n_out, rate in zip_longest(hidden, dropouts + [None] * (len(hidden) - len(dropouts))):
                 yield nn.Linear(n_in, n_out)
-                yield nn.BatchNorm1d(n_out)  # Added batch normalization
+                yield nn.BatchNorm1d(n_out)  
                 yield nn.ReLU()
                 if rate is not None and rate > 0.:
                     yield nn.Dropout(rate)

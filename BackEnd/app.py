@@ -3,8 +3,8 @@ import torch
 import joblib
 from torch.utils.data import DataLoader, Dataset
 from Neural_net_model import Neural_Net
-from flask_cors import CORS  # Import CORS
-import os  # Import os for environment variable access
+from flask_cors import CORS  
+import os  
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -32,7 +32,7 @@ product_encoder = joblib.load('./models/product_encoder.pkl')
 # Define the model architecture (same as during training)
 n_users = len(user_encoder.classes_)
 n_products = len(product_encoder.classes_)
-device = torch.device("cpu")  # Ensure it defaults to CPU (as Cloud Run doesn't support GPU)
+device = torch.device("cpu") 
 
 model = Neural_Net(
     n_users=n_users, 
@@ -103,5 +103,5 @@ def recommend_products():
 
 # Run the Flask app
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))  # Get port from environment variable
-    app.run(debug=False, host="0.0.0.0", port=port)  # Disable debug mode in production
+    port = int(os.environ.get('PORT', 8080))  
+    app.run(debug=False, host="0.0.0.0", port=port)  
